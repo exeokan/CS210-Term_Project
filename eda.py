@@ -28,24 +28,19 @@ df = df.dropna(subset=['account'])
 df['date'] = pd.to_datetime(df['date'])
 
 # Group by day and count the number of likes
-#likes_per_day = df.groupby(df['date'].dt.date).size().reset_index(name='likes')
-likes_per_day = df.groupby(df['date'].dt.week).size().reset_index(name='likes')
-print(df.head(30))
+likes_per_day = df.groupby(df['date'].dt.date).size().reset_index(name='likes')
+likes_per_day['date'] = pd.to_datetime(likes_per_day['date']) - pd.to_timedelta(7, unit='d')
+
+print(likes_per_day.info())
+likes_per_week = likes_per_day.groupby([pd.Grouper(key='date', freq='W')])['likes'].sum()
 # Print the new DataFrame
-print(likes_per_day)
+print(likes_per_week)
 
-
-
-# Create a pivot table to aggregate the likes by date and account
-pivot_table = likes_per_day.pivot_table(index='likes', columns='date', aggfunc='size')
-
-# Fill NaN values with 0
-pivot_table = pivot_table.fillna(0)
-
-# Create the heatmap
-plt.figure(figsize=(12, 8))
-sns.heatmap(pivot_table, cmap='YlGnBu')
-plt.title('Likes Distribution Over Time')
-plt.xlabel('Date')
+# Plot the likes per week as a line plot
+plt.plot(likes_per_week.index, likes_per_week.values)
+plt.xlabel('Week')
 plt.ylabel('Likes')
+plt.title('Likes per Week')
+
+
 plt.show()
