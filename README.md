@@ -63,8 +63,9 @@ It seems that chance of getting a reaction for me is higher in the group chats, 
 
 Models classification accuracy was measured as: 0.5745, which partially validates the hypothesis. I infer that since there is few weeks with much exam and assignment, the model fails to capture low and intermediate interactions 
   
+2. Second hypothesis was that I prioritized giving reactions to certain chats over the other. For testing I used Fisher's Exact Test, and measured p-values for each chat pair 
 
+![fishers](https://github.com/exeokan/CS210-Term_Project/assets/35339130/c2deed61-e91b-4d2a-be7c-0b1762327154)
 
-
-
+For a significance level of p=0.05, it can be argued that hypothesis is valid for many of the chats. Especially my low reaction rate to group chats is evident in the graph, their p-values with the personal DMs are significant
    
