@@ -51,7 +51,17 @@ It seems that chance of getting a reaction for me is higher in the group chats, 
 
   ![reaction_group](https://github.com/exeokan/CS210-Term_Project/assets/35339130/2d56ebf1-1646-444f-8655-771a654a2537)
 
+# Hypothesis Testing
 
+1. My first hypothesis was that my interaction total (likes+saves /day) can be predicted by how occupied I am by assignments and exams throughout the semester. For testing, I trained a decision tree using python. Here are the graphs of the correlation matrix, decision tree, and the confusion matrix.
+
+   ![correlation_m](https://github.com/exeokan/CS210-Term_Project/assets/35339130/7ba59e03-5872-475a-9c92-7f3d1d9fb26c)
+   
+   ![dec_tree](https://github.com/exeokan/CS210-Term_Project/assets/35339130/f08f91a8-09ea-4e21-aeb8-596b8c4de25f)
+   
+   ![confusion_matrix](https://github.com/exeokan/CS210-Term_Project/assets/35339130/b6391c8a-3e6a-42f2-b810-b34ce5ee8342)
+
+Models classification accuracy was measured as: 0.5745, which partially validates the hypothesis. I infer that since there is few weeks with much exam and assignment, the model fails to capture low and intermediate interactions 
   
 
 
