@@ -45,6 +45,23 @@ df_saves = pd.DataFrame(saved_posts)
 df_likes = df_likes.dropna(subset=['account'])
 df_saves = df_saves.dropna(subset=['account'])
 
+# Group by account and sum the number of likes
+likes_per_account = df_likes.groupby('account')['date'].count().reset_index()
+
+# Sort the DataFrame by the number of likes in descending order
+likes_per_account = likes_per_account.sort_values('date', ascending=False)
+likes_per_account = likes_per_account.rename(columns={'date': 'likes'})
+# Print the top 10 most liked accounts
+top_liked_accounts = likes_per_account.head(10)
+
+# Plot the top 10 most liked accounts in a bar graph
+plt.bar(top_liked_accounts['account'], top_liked_accounts['likes'])
+plt.xlabel('Account')
+plt.ylabel('Number of Likes')
+plt.title('Top 10 Most Liked Accounts')
+plt.show()
+
+
 # Convert the 'date' column to datetime
 df_likes['date'] = pd.to_datetime(df_likes['date'])
 df_saves['date'] = pd.to_datetime(df_saves['date'])
