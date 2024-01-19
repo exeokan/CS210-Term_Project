@@ -1,7 +1,3 @@
-#h1: like/save predicted by business
-#h2: reaction rate predicted by business
-
-#h3: assmymetry between reaction rates among accounts
 import pandas as pd
 import json
 import numpy as np
@@ -28,7 +24,8 @@ print(busy_df.head())
 busy_df['total'] = busy_df['exam'] + busy_df['assignment']
 print(busy_df)
 
-######################################################## acquire like save data #################################################################
+######################################################## hyp1 #################################################################
+#data gathering
 
 # Load the JSON file
 with open(r'insta_data\your_instagram_activity\likes\liked_posts.json') as file:
@@ -79,9 +76,8 @@ df_total = pd.merge(likes_per_day, saves_per_day, on='date', how='outer')
 df_total = df_total.fillna(0)
 df_total['total'] = df_total['likes'] + df_total['saves']
 
-####################################################### hyp1 ##################################################################
+####################################################### model training ##################################################################
 
-r'''
 df_total['total_category'] = pd.cut(df_total['total'], bins=[0, 7, 20, np.inf], labels=[0, 1, 2])#low, intermediate, high
 df_total['exam']= busy_df['exam']
 df_total['assignment']= busy_df['assignment']
@@ -161,7 +157,7 @@ new_labels = ['low', 'intermediate', 'high']
 
 # Report the classification accuracy
 accuracy = accuracy_score(y_test, y_pred)
-print(f"Classification Accuracy: {accuracy:.4f}")
+
 
 # Plot the confusion matrix
 cm = confusion_matrix(y_test, y_pred, labels=unique_labels)
@@ -174,92 +170,9 @@ plt.xlabel('Predicted')
 plt.ylabel('Actual')
 plt.show()
 
+print(f"Classification Accuracy: {accuracy:.4f}")
 
-####################################################### hyp2 ##################################################################
-
-
-limitToTerm = True
-termStart= datetime(2023, 8, 31)
-
-DM_file_names=[r'insta_data\your_instagram_activity\messages\inbox\ardabaristonbil_933043168094634\message_1.json',
-           r'insta_data\your_instagram_activity\messages\inbox\aylinozkaya_496071265125162\message_1.json',
-           r'insta_data\your_instagram_activity\messages\inbox\mertpolat_496349915097297\message_1.json',
-           r'insta_data\your_instagram_activity\messages\inbox\taha_813439610054991\message_1.json',
-           r'insta_data\your_instagram_activity\messages\inbox\utku_906578497407768\message_1.json']
-
-
-
-n_dms = len(DM_file_names)
-
-DM_file_data = {}
-group_file_data = {}
-# Load the JSON files for DMs
-for file_name in DM_file_names:
-    with open(file_name) as file:
-        DM_file_data[file_name] = json.load(file)
-
-# Load the JSON files for group messages
-
-# Create a dataframe for each DM
-dm_dfs = []
-for file_name in DM_file_names:
-    messages=[]
-    for message in DM_file_data[file_name]['messages']:
-        if 'content' not in message:
-            continue
-        is_post = message['content'].endswith('attachment.')
-        sent_by_me = message['sender_name'] == 'Ege'
-        timestamp = datetime.fromtimestamp(message['timestamp_ms']/1000)
-        reacted_by_me = False
-        reacted_by_else = False
-        if 'reactions' in message:
-            for reaction in message['reactions']:
-                if reaction['actor'] == 'Ege':
-                    reacted_by_me = True
-                else:
-                    reacted_by_else = True
-                if reacted_by_me and reacted_by_else:
-                    break
-        if not limitToTerm or (timestamp > termStart):
-            messages.append({'sent_by_me': sent_by_me, 'timestamp': timestamp, 'is_post': is_post, 
-                             'reacted_by_me': reacted_by_me, 'reacted_by_else': reacted_by_else})
-    df = pd.DataFrame(messages)
-    dm_dfs.append(df)
-
-reaction_date_dfs = []
-for df in dm_dfs:
-    grouped_df = df[(df['sent_by_me'] == False) & (df['is_post'] == True)].groupby(df['timestamp'].dt.date)
-    reaction_date_df = pd.DataFrame({
-        'date': grouped_df['timestamp'].first().dt.date,
-        'total_posts': grouped_df.size(),
-        'posts_reacted_by_me': grouped_df['reacted_by_me'].sum()
-    })
-    reaction_date_df.reset_index()
-    reaction_date_df['reaction_ratio'] = reaction_date_df['posts_reacted_by_me'] / reaction_date_df['total_posts']
-    reaction_date_dfs.append(reaction_date_df)
-
-total_rate_dm_df = pd.DataFrame()
-total_rate_dm_df['date'] = busy_df['date']
-total_rate_dm_df['total_posts'] = 0
-total_rate_dm_df['posts_reacted_by_me'] = 0
-
-total_rate_dm_df.set_index('date', inplace=True)
-
-print(total_rate_dm_df.head())
-# Plot the data
-for i in range(n_dms):
-    print(reaction_date_dfs[i].head(20))
-    reaction_date_dfs[i].set_index('date', inplace=True)
-    reaction_date_dfs[i] = reaction_date_dfs[i].reindex(total_rate_dm_df.index, fill_value=0)  # Fix: Reindex and fill missing values with 0
-    
-    total_rate_dm_df['total_posts'] += reaction_date_dfs[i]['total_posts']
-    total_rate_dm_df['posts_reacted_by_me'] += reaction_date_dfs[i]['posts_reacted_by_me']
-    print(reaction_date_dfs[i].head(20))
-    print(total_rate_dm_df.head(20))
-
-total_rate_dm_df['reaction_ratio'] = total_rate_dm_df['posts_reacted_by_me'] / total_rate_dm_df['total_posts']
-print(total_rate_dm_df)
-'''
+######################################################## hyp2 #################################################################
 
 limitToTerm = True
 termStart= datetime(2023, 8, 31)
@@ -365,20 +278,11 @@ outgoing_df = pd.DataFrame(outgoing_reaction_rates).reset_index()
 incoming_df = incoming_df.reindex([True, False], axis=1)
 outgoing_df = outgoing_df.reindex([True, False], axis=1)
 
-print(incoming_df.head(10))
-print(outgoing_df.head(10))
-
 import scipy.stats as stats
 
 test_df=pd.DataFrame()
 test_df['True']=incoming_df[True]
 test_df['False']=incoming_df[False]
-
-print(test_df.head(10))
-# Perform a Chi-Square test of independence
-
-# Perform a Chi-Square test of independence for every row combination
-import matplotlib.pyplot as plt
 
 # Calculate the p-values and store them in a matrix
 p_values = []
