@@ -113,7 +113,7 @@ outgoing_df = pd.DataFrame(outgoing_reaction_rates)
 incoming_df = incoming_df.reindex([True, False], axis=1)
 outgoing_df = outgoing_df.reindex([True, False], axis=1)
 
-'''
+
 ############################################################ plot p2p dms ############################################################
 sns.set(style="whitegrid")
 
@@ -164,7 +164,7 @@ plt.legend(['Reacted', 'Not reacted'])
 # Title of plot
 plt.title('Reaction rate of others to outgoing DMs in groups')
 plt.show()
-'''
+
 ############################################################ reply rate through time ############################################################
 
 reaction_date_dfs = []
@@ -230,7 +230,7 @@ for i in range(n_dms, n_dms + n_groups):
     total_rate_group_df['posts_reacted_by_me'] += reaction_date_dfs[i]['posts_reacted_by_me']
 
 total_rate_group_df['reaction_ratio'] = total_rate_group_df['posts_reacted_by_me'] / total_rate_group_df['total_posts']
-
+print(total_rate_group_df.head(30))
 plt.xlabel('Week')
 plt.ylabel('Reaction Ratio')
 plt.title('Reaction ratio of me to incoming DMs in groups')

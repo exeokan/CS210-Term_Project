@@ -20,7 +20,7 @@ with open(r'insta_data\your_instagram_activity\saved\saved_posts.json') as file:
 liked_posts = []
 saved_posts = []
 
-limitToTerm = False
+limitToTerm = True
 termStart= datetime(2023, 8, 31)
 
 for post in like_data['likes_media_likes']:
@@ -80,6 +80,7 @@ df_total = pd.merge(likes_per_week, saves_per_week, on='date', how='outer')
 df_total = df_total.fillna(0)
 df_total['total'] = df_total['likes'] + df_total['saves']
 
+print(df_total.head(30))
 # Plot the likes/saves per week as a line plot
 plt.plot(likes_per_week['date'], likes_per_week['likes'], label='Likes')
 plt.plot(saves_per_week['date'], saves_per_week['saves'], label='Saves')
