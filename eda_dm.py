@@ -9,7 +9,7 @@ import json
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-limitToTerm = False
+limitToTerm = True
 termStart= datetime(2023, 8, 31)
 
 DM_file_names=[r'insta_data\your_instagram_activity\messages\inbox\ardabaristonbil_933043168094634\message_1.json',
@@ -37,7 +37,7 @@ for file_name in group_file_names:
         group_file_data[file_name] = json.load(file)
 
 
-
+# Create a dataframe for each DM
 dm_dfs = []
 for file_name in DM_file_names:
     messages=[]
@@ -88,6 +88,7 @@ for file_name in group_file_names:
     df = pd.DataFrame(messages)
     group_dfs.append(df)
 
+# calculate reaction rates
 incoming_reaction_rates = []
 outgoing_reaction_rates = []
 for df in dm_dfs:
@@ -112,7 +113,7 @@ outgoing_df = pd.DataFrame(outgoing_reaction_rates)
 incoming_df = incoming_df.reindex([True, False], axis=1)
 outgoing_df = outgoing_df.reindex([True, False], axis=1)
 
-
+'''
 ############################################################ plot p2p dms ############################################################
 sns.set(style="whitegrid")
 
@@ -122,7 +123,7 @@ plt.ylabel('Value')
 
 # Set the x-axis tick labels to index numbers
 plt.xticks(range(n_dms), range((n_dms)), rotation=0)
-
+plt.legend(['Reacted', 'Not reacted'])
 # Title of plot
 plt.title('Reaction rate of me to incoming DMs from people')
 plt.show()
@@ -133,7 +134,7 @@ plt.ylabel('Value')
 
 # Set the x-axis tick labels to index numbers
 plt.xticks(range(n_dms), range((n_dms)), rotation=0)
-
+plt.legend(['Reacted', 'Not reacted'])
 # Title of plot
 plt.title('Reaction rate of others to outgoing DMs from me')
 plt.show()
@@ -148,7 +149,7 @@ plt.ylabel('Value')
 
 # Set the x-axis tick labels to index numbers
 plt.xticks(range(n_groups), range((n_groups)), rotation=0)
-
+plt.legend(['Reacted', 'Not reacted'])
 # Title of plot
 plt.title('Reaction rate of me to incoming DMs in groups')
 plt.show()
@@ -159,7 +160,74 @@ plt.ylabel('Value')
 
 # Set the x-axis tick labels to index numbers
 plt.xticks(range(n_groups), range((n_groups)), rotation=0)
-
+plt.legend(['Reacted', 'Not reacted'])
 # Title of plot
 plt.title('Reaction rate of others to outgoing DMs in groups')
 plt.show()
+'''
+############################################################ reply rate through time ############################################################
+
+reaction_date_dfs = []
+
+all_dfs = dm_dfs + group_dfs
+
+
+for df in dm_dfs:
+    grouped_df = df[(df['sent_by_me'] == False) & (df['is_post'] == True)].groupby(df['timestamp'].dt.date)
+    reaction_date_df = pd.DataFrame({
+        'date': grouped_df['timestamp'].first().dt.date,
+        'total_posts': grouped_df.size(),
+        'posts_reacted_by_me': grouped_df['reacted_by_me'].sum()
+    })
+    
+    reaction_date_df.reset_index()
+    reaction_date_df['date'] = pd.to_datetime(reaction_date_df['date']) - pd.to_timedelta(7, unit='d')
+    reaction_date_df = reaction_date_df.groupby([pd.Grouper(key='date', freq='W')])[['total_posts', 'posts_reacted_by_me']].sum().reset_index()
+
+    reaction_date_df['reaction_ratio'] = reaction_date_df['posts_reacted_by_me'] / reaction_date_df['total_posts']
+    reaction_date_dfs.append(reaction_date_df)
+
+result_df = pd.DataFrame()
+result_df['date'] = reaction_date_dfs[0]['date']
+result_df['total_posts'] = 0
+result_df['posts_reacted_by_me'] = 0
+
+# Plot the data
+for i in range(n_dms):
+    plt.plot(reaction_date_dfs[i]['date'], reaction_date_dfs[i]['reaction_ratio'], label= i)
+    print(reaction_date_dfs[i].head())
+    result_df['total_posts'] += reaction_date_dfs[i]['total_posts']
+    result_df['posts_reacted_by_me'] += reaction_date_dfs[i]['posts_reacted_by_me']
+    print(result_df.head())
+
+result_df['reaction_ratio'] = result_df['posts_reacted_by_me'] / result_df['total_posts']
+
+
+plt.xlabel('Week')
+plt.ylabel('Reaction Ratio')
+plt.title('Reaction ratio of me to incoming DMs from people')
+plt.legend()
+
+plt.show()
+
+#total 
+
+plt.plot(result_df['date'], result_df['reaction_ratio'], label= 'total')
+plt.xlabel('Week')
+plt.ylabel('Reaction Ratio')
+plt.title('Reaction ratio of me to TOTAL incoming DMs from people')
+plt.legend()
+
+plt.show()
+
+#for groups
+for i in range(n_groups):
+    plt.plot(reaction_date_dfs[i]['date'], reaction_date_dfs[i]['reaction_ratio'], label= i)
+
+plt.xlabel('Week')
+plt.ylabel('Reaction Ratio')
+plt.title('Reaction ratio of me to incoming DMs in groups')
+plt.legend()
+
+plt.show()
+
