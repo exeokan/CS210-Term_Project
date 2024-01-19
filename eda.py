@@ -5,6 +5,10 @@ from datetime import datetime
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+
+#en cok likelananlara bakılabilir
+
+
 # Load the JSON file
 with open('insta_data\your_instagram_activity\likes\liked_posts.json') as file:
     like_data = json.load(file)
