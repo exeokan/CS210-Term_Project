@@ -6,13 +6,14 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-#en cok likelananlara bakılabilir
+#en cok likelananlara bakılabilir-> bunu yapmak için like_data['likes_media_likes'] içindeki title ve string_list_data içindeki timestamp kullanılabilir,
+#->distinction between accounts
 
 
 # Load the JSON file
-with open('insta_data\your_instagram_activity\likes\liked_posts.json') as file:
+with open(r'insta_data\your_instagram_activity\likes\liked_posts.json') as file:
     like_data = json.load(file)
-with open('insta_data\your_instagram_activity\saved\saved_posts.json') as file:
+with open(r'insta_data\your_instagram_activity\saved\saved_posts.json') as file:
     save_data = json.load(file)
 
 # Extract the relevant information
